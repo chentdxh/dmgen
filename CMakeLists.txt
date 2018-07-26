@@ -62,7 +62,7 @@ IF (WIN32)
         ${CMAKE_CURRENT_SOURCE_DIR}/ctemplate/src/windows/port.cc
         )
 
-    ADD_LIBRARY(libctemplate ${CTEMPLATE_SOURCES})
+    ADD_LIBRARY(ctemplate ${CTEMPLATE_SOURCES})
 
     FILE(GLOB DMGEN_SOURCES
         ${CMAKE_CURRENT_SOURCE_DIR}/src/arg_parser.cpp
@@ -71,7 +71,7 @@ IF (WIN32)
         ${CMAKE_CURRENT_SOURCE_DIR}/src/main.cpp)
 
     ADD_EXECUTABLE(dmgen ${DMGEN_SOURCES})
-    TARGET_LINK_LIBRARIES(dmgen libctemplate)
+    TARGET_LINK_LIBRARIES(dmgen ctemplate)
 ELSEIF (APPLE)
     INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR}/ctemplate)
     INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR}/ctemplate/src)
@@ -107,8 +107,8 @@ ELSEIF (APPLE)
     ${CMAKE_CURRENT_SOURCE_DIR}/ctemplate/src/template_string.cc
     )
 
-    ADD_LIBRARY(libctemplate ${CTEMPLATE_SOURCES})
-    TARGET_LINK_LIBRARIES(libctemplate)
+    ADD_LIBRARY(ctemplate ${CTEMPLATE_SOURCES})
+    TARGET_LINK_LIBRARIES(ctemplate)
 
     FILE(GLOB DMGEN_SOURCES
         ${CMAKE_CURRENT_SOURCE_DIR}/src/arg_parser.cpp
@@ -117,7 +117,7 @@ ELSEIF (APPLE)
         ${CMAKE_CURRENT_SOURCE_DIR}/src/main.cpp)
 
     ADD_EXECUTABLE(dmgen ${DMGEN_SOURCES})
-    TARGET_LINK_LIBRARIES(dmgen libctemplate)
+    TARGET_LINK_LIBRARIES(dmgen ctemplate)
 
 ELSEIF (UNIX)
     INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR}/ctemplate)
@@ -154,8 +154,8 @@ ELSEIF (UNIX)
         ${CMAKE_CURRENT_SOURCE_DIR}/ctemplate/src/template_string.cc
         )
 
-    ADD_LIBRARY(libctemplate ${CTEMPLATE_SOURCES})
-    TARGET_LINK_LIBRARIES(libctemplate)
+    ADD_LIBRARY(ctemplate ${CTEMPLATE_SOURCES})
+    TARGET_LINK_LIBRARIES(ctemplate)
 
     FILE(GLOB DMGEN_SOURCES
         ${CMAKE_CURRENT_SOURCE_DIR}/src/arg_parser.cpp
@@ -164,5 +164,5 @@ ELSEIF (UNIX)
         ${CMAKE_CURRENT_SOURCE_DIR}/src/main.cpp)
 
     ADD_EXECUTABLE(dmgen ${DMGEN_SOURCES})
-    TARGET_LINK_LIBRARIES(dmgen libctemplate)
+    TARGET_LINK_LIBRARIES(dmgen ctemplate)
 ENDIF ()
