@@ -125,6 +125,7 @@ bool CDMGen::DoCommand(int argc, char* argv[])
     const Arg_parser::Option options[] =
     {
         { 'p', "projectname",    Arg_parser::yes },
+        { 'f', "force",    Arg_parser::no },
 		{ 0, 0,          Arg_parser::no }
     };
 
@@ -135,6 +136,7 @@ bool CDMGen::DoCommand(int argc, char* argv[])
         return false;
     }
 
+    bool bForce = false;
 
     for (int argind = 0; argind < parser.arguments(); ++argind)
     {
@@ -154,6 +156,11 @@ bool CDMGen::DoCommand(int argc, char* argv[])
             m_strProjectName = arg;
         }
         break;
+        case 'f':
+        {
+            bForce = true;
+        }
+        break;
         default:
             DMLog("Arg_parser %c failed\r\n", (char)code);
             return false;
@@ -167,10 +174,13 @@ bool CDMGen::DoCommand(int argc, char* argv[])
 
     std::string strRoot = DMGetWorkPath() + PATH_DELIMITER + m_strProjectName;
     
-    if (DMDirectoryExist(strRoot.c_str()))
+    if (!bForce)
     {
-        DMLog("project %s exist\r\n", strRoot.c_str());
-        return false;
+        if (DMDirectoryExist(strRoot.c_str()))
+        {
+            DMLog("project %s exist\r\n", strRoot.c_str());
+            return false;
+        }
     }
 
 	for (int i = ETPLTYPE_DMCMAKE__BEGIN; i < ETPLTYPE_DMCMAKE__END; ++i)
