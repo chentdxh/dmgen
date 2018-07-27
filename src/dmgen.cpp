@@ -11,6 +11,7 @@
 #include "strtk.hpp"
 
 #include "dmcmake_package_bin.h"
+#include "dmerror_package_bin.h"
 
 #include <ctemplate/per_expand_data.h>
 #include <ctemplate/template.h>
@@ -25,7 +26,14 @@
 
 #include <fstream>
 
+#include "pugixml.hpp"
+
 #define DMLog printf
+
+const char * ELEM_CODER = "coder";
+const char * ELEM_ERRORS = "errors";
+
+using namespace pugi;
 
 CDMGen::CDMGen()
 {
@@ -39,6 +47,64 @@ CDMGen::~CDMGen()
 
 bool CDMGen::Init()
 {
+    return true
+        && LoadError()
+        && true;
+}
+
+bool CDMGen::LoadError()
+{
+    std::string strFileName = CDMTPL_DMERROR::GetFileName(ETPLTYPE_ERRORCODE_XAT);
+    std::string strBuffer = CDMTPL_DMERROR::GetData(ETPLTYPE_ERRORCODE_XAT);
+
+    xml_document doc;
+    if (!doc.load_buffer(strBuffer.c_str(), strBuffer.size()))
+    {
+        DMLog("xat file:%s is not exist\r\n", strFileName.c_str());
+        return false;
+    }
+
+    xml_node coder = doc.child(ELEM_CODER);
+    if (!coder)
+    {
+        DMLog("not find root node %s\r\n", ELEM_CODER);
+        return false;
+    }
+
+    xml_node errors = coder.child(ELEM_ERRORS);
+    if (errors)
+    {
+        xml_object_range<xml_named_node_iterator> Item = errors.children("error");
+        xml_named_node_iterator It = Item.begin();
+
+        for (; It != Item.end(); ++It)
+        {
+            std::string strErrorName = (*It).attribute("name").as_string();
+            std::string strErrorID = (*It).attribute("id").as_string();
+            std::string strInfo = (*It).attribute("info").as_string();
+            std::string strDes = (*It).attribute("des").as_string();
+
+            if (strErrorName.empty())
+            {
+                DMLog("error name is empty\r\n");
+                return false;
+            }
+
+            CDM_ERROR oError;
+
+            oError.GetName() = strErrorName;
+            oError.GetID() = atoi(strErrorID.c_str());
+
+            oError.GetInfo() = strInfo;
+            oError.GetDes() = strDes;
+
+            if (!AddError(oError))
+            {
+                DMLog("error node [%s] error\r\n", strErrorName.c_str());
+                return false;
+            }
+        }
+    }
     return true;
 }
 
@@ -176,9 +242,71 @@ std::string CDMGen::ExpandFileName(const std::string& strFile)
     return strOut;
 }
 
+bool CDMGen::AddError(CDM_ERROR& oError)
+{
+    for (int i = 0; i < static_cast<int>(m_vecErrorCode.size()); i++)
+    {
+        if (m_vecErrorCode[i].GetName() == oError.GetName()
+            || m_vecErrorCode[i].GetID() == oError.GetID())
+        {
+            DMLog("已存在错误码定义 %s -> %d\r\n", m_vecErrorCode[i].GetName().c_str(), m_vecErrorCode[i].GetID());
+            return false;
+        }
+    }
+
+    m_vecErrorCode.push_back(oError);
+    return true;
+}
+
 void CDMGen::OnSetData(tpl::TemplateDictionary& oDict)
 {
+    std::string strUP_PROTO_NAME = strtk::as_lowercase(m_strProjectName);
+    std::string strLO_PROTO_NAME = strtk::as_uppercase(m_strProjectName);
+
     oDict.SetGlobalValue("PROJECT_NAME", m_strProjectName.c_str());
+
+    oDict.SetGlobalValue("UP_PROTO_NAME", strUP_PROTO_NAME.c_str());
+    oDict.SetGlobalValue("LO_PROTO_NAME", strLO_PROTO_NAME.c_str());
+    oDict.SetGlobalValue("PROTO_NAME", m_strProjectName.c_str());
+
+    for (int i = 0; i < static_cast<int>(m_vecErrorCode.size()); i++)
+    {
+        CDM_ERROR& oError = m_vecErrorCode[i];
+        tpl::TemplateDictionary* poEnum = oDict.AddSectionDictionary("ERRORCODE_LIST_ENUM");
+        if (poEnum)
+        {
+            poEnum->SetValue("ERROR_NAME", oError.GetName().c_str());
+            poEnum->SetIntValue("ERROR_ID", oError.GetID());
+            poEnum->SetValue("ERROR_INFO", oError.GetInfo());
+            poEnum->SetValue("ERROR_DES", oError.GetDes());
+        }
+    }
+
+    for (int i = 0; i < static_cast<int>(m_vecErrorCode.size()); i++)
+    {
+        CDM_ERROR& oError = m_vecErrorCode[i];
+        tpl::TemplateDictionary* poEnum = oDict.AddSectionDictionary("ERRORCODE_LIST_GETERROR");
+        if (poEnum)
+        {
+            poEnum->SetValue("ERROR_NAME", oError.GetName().c_str());
+            poEnum->SetIntValue("ERROR_ID", oError.GetID());
+            poEnum->SetValue("ERROR_INFO", oError.GetInfo());
+            poEnum->SetValue("ERROR_DES", oError.GetDes());
+        }
+    }
+
+    for (int i = 0; i < static_cast<int>(m_vecErrorCode.size()); i++)
+    {
+        CDM_ERROR& oError = m_vecErrorCode[i];
+        tpl::TemplateDictionary* poEnum = oDict.AddSectionDictionary("ERRORCODE_LIST_SWITCH");
+        if (poEnum)
+        {
+            poEnum->SetValue("ERROR_NAME", oError.GetName().c_str());
+            poEnum->SetIntValue("ERROR_ID", oError.GetID());
+            poEnum->SetValue("ERROR_INFO", oError.GetInfo());
+            poEnum->SetValue("ERROR_DES", oError.GetDes());
+        }
+    }
 }
 
 void CDMGen::OnSetFileName(tpl::TemplateDictionary& oDict)
