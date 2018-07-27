@@ -260,8 +260,8 @@ bool CDMGen::AddError(CDM_ERROR& oError)
 
 void CDMGen::OnSetData(tpl::TemplateDictionary& oDict)
 {
-    std::string strUP_PROTO_NAME = strtk::as_lowercase(m_strProjectName);
-    std::string strLO_PROTO_NAME = strtk::as_uppercase(m_strProjectName);
+    std::string strUP_PROTO_NAME = strtk::as_uppercase(m_strProjectName);
+    std::string strLO_PROTO_NAME = strtk::as_lowercase(m_strProjectName);
 
     oDict.SetGlobalValue("PROJECT_NAME", m_strProjectName.c_str());
 
