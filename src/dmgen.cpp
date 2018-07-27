@@ -129,6 +129,7 @@ bool CDMGen::DoCommand(int argc, char* argv[])
             std::ios::out | std::ios::binary);
 
         if (ofsh.fail()) {
+            DMASSERT(0);
             continue;
         }
 
