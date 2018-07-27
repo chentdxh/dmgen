@@ -34,12 +34,17 @@ public:
     virtual ~CDMGen();
 
     bool Init();
-
-    std::string MakeFile(int nType);
-
+public:
+    // interface
     bool DoCommand(int argc, char* argv[]);
-
-	void OnSetData(tpl::TemplateDictionary& oDict);
+public:
+    // inner
+    std::string MakeFile(int nType);
+    std::string ExpandFileName(const std::string& strFile);
+public:
+    // event
+    void OnSetData(tpl::TemplateDictionary& oDict);
+    void OnSetFileName(tpl::TemplateDictionary& oDict);
 private:
 
     std::string m_strUserPath;

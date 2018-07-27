@@ -42,25 +42,6 @@ bool CDMGen::Init()
     return true;
 }
 
-std::string CDMGen::MakeFile(int nType)
-{
-	tpl::TemplateDictionary oDict(CDMTPL_DMCMAKE::GetFileName(nType));
-    std::string strOut;
-
-	tpl::Template* poTemplate = tpl::Template::StringToTemplate(CDMTPL_DMCMAKE::GetData(
-		nType), CDMTPL_DMCMAKE::GetDataSize(nType), ctemplate::DO_NOT_STRIP);
-
-    if (NULL == poTemplate) {
-        return strOut;
-    }
-
-	OnSetData(oDict);
-
-    poTemplate->Expand(&strOut, &oDict);
-
-    return strOut;
-}
-
 bool CDMGen::DoCommand(int argc, char* argv[])
 {
     std::vector<std::string> vecCommand;
@@ -132,6 +113,8 @@ bool CDMGen::DoCommand(int argc, char* argv[])
 
         std::string strFile = CDMTPL_DMCMAKE::GetFileName(i);
 
+        strFile = ExpandFileName(strFile);
+
 		strtk::replace('|', PATH_DELIMITER, strFile);
 
 		strFile = strRoot + PATH_DELIMITER + strFile;
@@ -155,7 +138,49 @@ bool CDMGen::DoCommand(int argc, char* argv[])
     return true;
 }
 
+std::string CDMGen::MakeFile(int nType)
+{
+    tpl::TemplateDictionary oDict(CDMTPL_DMCMAKE::GetFileName(nType));
+    std::string strOut;
+
+    tpl::Template* poTemplate = tpl::Template::StringToTemplate(CDMTPL_DMCMAKE::GetData(
+        nType), CDMTPL_DMCMAKE::GetDataSize(nType), ctemplate::DO_NOT_STRIP);
+
+    if (NULL == poTemplate) {
+        return strOut;
+    }
+
+    OnSetData(oDict);
+
+    poTemplate->Expand(&strOut, &oDict);
+
+    return strOut;
+}
+
+std::string CDMGen::ExpandFileName(const std::string& strFile)
+{
+    tpl::TemplateDictionary oDict(strFile);
+    std::string strOut;
+
+    tpl::Template* poTemplate = tpl::Template::StringToTemplate(strFile.c_str(), strFile.size(), ctemplate::DO_NOT_STRIP);
+
+    if (NULL == poTemplate) {
+        return strFile;
+    }
+
+    OnSetFileName(oDict);
+
+    poTemplate->Expand(&strOut, &oDict);
+    
+    return strOut;
+}
+
 void CDMGen::OnSetData(tpl::TemplateDictionary& oDict)
+{
+    oDict.SetGlobalValue("PROJECT_NAME", m_strProjectName.c_str());
+}
+
+void CDMGen::OnSetFileName(tpl::TemplateDictionary& oDict)
 {
     oDict.SetGlobalValue("PROJECT_NAME", m_strProjectName.c_str());
 }
