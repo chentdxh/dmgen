@@ -259,7 +259,7 @@ bool CDMGen::AddError(CDM_ERROR& oError)
         if (m_vecErrorCode[i].GetName() == oError.GetName()
             || m_vecErrorCode[i].GetID() == oError.GetID())
         {
-            DMLog("已存在错误码定义 %s -> %d\r\n", m_vecErrorCode[i].GetName().c_str(), m_vecErrorCode[i].GetID());
+            DMLog("repeat %s -> %d\r\n", m_vecErrorCode[i].GetName().c_str(), m_vecErrorCode[i].GetID());
             return false;
         }
     }
