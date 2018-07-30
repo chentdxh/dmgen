@@ -114,7 +114,7 @@ static inline bool DMDirectoryCreate(const char *dir_name, bool force)
 #ifdef WIN32
     int ret = mkdir(dir_name);
 #else
-    int ret = mkdir(dir_name, S_IREAD | S_IWRITE);
+    int ret = mkdir(dir_name,S_IRWXU | S_IRWXG );
 #endif
     if (!force)
     {
